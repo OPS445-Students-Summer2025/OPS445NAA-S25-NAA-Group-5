@@ -35,7 +35,7 @@ def validate_ip(ip):
 # ----------------------------
 # Function 2: Backup Config File
 # ----------------------------
-def backup_file(file_path):
+def backup_file(file_path, yes_backup: bool = True, enter_response: bool = True):
     """
     Creates a backup of the given network config file.
 
@@ -46,8 +46,35 @@ def backup_file(file_path):
         - Check if the file exists.
         - Copy it to a new file with '.bak' extension.
     """
+    
+    
+    ##prompts the user to create a backup of the given network config file
+
+    if yes_backup:
+        resp = input("Would you like to create a backup of your network config file?(Y/N)")
+        resp = resp.strip().lower()
+
+        if not resp:
+            if enter_response:
+                print("No response; skipping backup.")
+                return None
+            resp = "y"
+
+        if resp not in ("y", "yes"):
+            print("No backup made.")
+            return None
+        
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+    
+    backup_file = file_path + ".bak"
+    shutil.copy2(file_path, backup_file)
+    print(f"Backup created: {backup_file}")
+    return backup_file
     # TODO: Use shutil to copy the file safely
-    pass
+    #pass
+
+    ## error: Permission denied. Needs sudo access to make backup in "etc/network/interfaces.bak"
 
 
 # ----------------------------
@@ -143,8 +170,12 @@ def main():
         parser.print_help()
 
 
+
+
+
 # ----------------------------
 # Entry Point
 # ----------------------------
 if __name__ == "__main__":
-    main()
+    #main()
+    print(backup_file("/etc/network/interfaces"))
