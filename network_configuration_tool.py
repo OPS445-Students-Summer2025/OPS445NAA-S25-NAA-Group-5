@@ -35,7 +35,7 @@ def validate_ip(ip):
 # ----------------------------
 # Function 2: Backup Config File
 # ----------------------------
-def backup_file(file_path, yes_backup: bool = True, enter_response: bool = True):
+def backup_file(file_path):
     """
     Creates a backup of the given network config file.
 
@@ -48,34 +48,62 @@ def backup_file(file_path, yes_backup: bool = True, enter_response: bool = True)
     """
     
     
-    ##prompts the user to create a backup of the given network config file
+    # ##prompts the user to create a backup of the given network config file
 
-    if yes_backup:
-        resp = input("Would you like to create a backup of your network config file?(Y/N)")
-        resp = resp.strip().lower()
+    # if yes_backup:
+    #     resp = input("Would you like to create a backup of your network config file?(Y/N)")
+    #     resp = resp.strip().lower()
 
-        if not resp:
-            if enter_response:
-                print("No response; skipping backup.")
-                return None
-            resp = "y"
+    #     if not resp:
+    #         if enter_response:
+    #             print("No response; skipping backup.")
+    #             return
+    #         resp = "y"
 
-        if resp not in ("y", "yes"):
-            print("No backup made.")
-            return None
+    #     if resp not in ("y", "yes"):
+    #         print("No backup made.")
+    #         return
         
-    if not os.path.isfile(file_path):
-        raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+    # if not os.path.isfile(file_path):
+    #     raise FileNotFoundError(f"The file '{file_path}' does not exist.")
     
-    backup_file = file_path + ".bak"
-    shutil.copy2(file_path, backup_file)
-    print(f"Backup created: {backup_file}")
-    return backup_file
-    # TODO: Use shutil to copy the file safely
-    #pass
+    # backup_file = file_path + ".bak"
+    # shutil.copy2(file_path, backup_file)
+    # print(f"Backup created: {backup_file}")
+    # return backup_file
+    # # TODO: Use shutil to copy the file safely
+    # #pass
 
     ## error: Permission denied. Needs sudo access to make backup in "etc/network/interfaces.bak"
 
+    response = input("Would you like to create a backup of your network config file? (Y/N): ")
+    response = response.strip().lower()
+
+    if response not in ("y", "yes"):
+        print("Backup skipped.")
+        return None
+
+    # Proceed with backup
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+
+    backup_dir = os.path.expanduser("~/backups")
+    os.makedirs(backup_dir, exist_ok=True)
+
+    backup_path = os.path.join(backup_dir, os.path.basename(file_path) + ".bak")
+
+    try:
+        shutil.copy2(file_path, backup_path)
+    except PermissionError as exc:
+        # This could happen if you can't read the source file.
+        print(f"Backup failed due to permissions: {exc}")
+        return None
+    except OSError as exc:
+        print(f"Backup failed: {exc}")
+        return None
+
+    print(f"Backup created at: {backup_path}")
+    return backup_path
 
 # ----------------------------
 # Function 3: Change Network Mode (static/dhcp)
@@ -178,4 +206,4 @@ def main():
 # ----------------------------
 if __name__ == "__main__":
     #main()
-    print(backup_file("/etc/network/interfaces"))
+    backup_file("/etc/network/interfaces")
