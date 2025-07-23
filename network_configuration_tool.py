@@ -29,7 +29,26 @@ def validate_ip(ip):
         bool: True if valid, False otherwise.
     """
     # TODO: Implement logic to check IP address format (e.g., 192.168.0.1)
-    pass
+
+
+    parts = ip.split(".")
+
+    if len(parts) == 4:			
+        for part in parts:
+            if part.isdigit():		
+                number = int(part)	
+                if number < 0 or number > 255:	
+                    print(f' Oops! {number} is out of range (0-255).')
+                    return False
+            else:
+                print(f"Oops! '{part}' is not a number.")	
+                return False
+        print(f'Great! {ip} is a valid IPv4 address.')	
+        return True
+    else:
+        print('Oops! IP address must have 4 numbers separated by dots.')	
+        return False
+
 
 
 # ----------------------------
@@ -214,6 +233,30 @@ def main():
 
     # Subcommand: backup
     parser_backup = subparsers.add_parser("backup", help="Backup a network config file")
+    parser_change = subparsers.add_parser("change", help="Change network mode (static/dhcp)")
+    parser_change.add_argument("file", help="Path to the config file")
+    parser_change.add_argument("mode", choices=["static", "dhcp"], help="Network mode to set")
+    parser_change.add_argument("--ip", help="Static IP address (required for static mode)")
+
+    # Subcommand: ping
+    parser_ping = subparsers.add_parser("ping", help="Ping a target to test connectivity")
+    parser_ping.add_argument("--target", default="8.8.8.8", help="Target IP to ping")
+
+    args = parser.parse_args()
+
+    # TODO: Call the appropriate function based on command
+    if args.command == "validate":
+        pass  # Call validate_ip()
+
+    elif args.command == "backup":
+        pass  # Call backup_file()
+
+    elif args.command == "change":
+        pass  # Call change_network_mode()
+
+    elif args.command == "ping":
+        pass  # Call test_ping()
+
     parser_backup.add_argument("file", help="Path to the file to back up")
 
     # Subcommand: change
