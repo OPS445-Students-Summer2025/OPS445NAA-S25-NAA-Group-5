@@ -29,7 +29,16 @@ def validate_ip(ip):
         bool: True if valid, False otherwise.
     """
     # TODO: Implement logic to check IP address format (e.g., 192.168.0.1)
-    pass
+    parts = ip.split(".")
+
+    if len(parts) == 4:			# should be 4 parts with "." as a splitter
+        for part in parts:
+            if part.isdigit():		# each part should be a number
+                number = int(part)	# convert part to integer for checking number range below
+                if number < 0 or number > 255:	# check if the number is within the range
+                    print(f' Oops: {number} is out of range (0-255).')
+                    return False
+            else:
 
 
 # ----------------------------
