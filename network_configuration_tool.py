@@ -18,6 +18,7 @@ import subprocess
 # ----------------------------
 # Function 1: Validate IP Address
 # ----------------------------
+
 def validate_ip(ip):
     """
     Checks if the given IP address is valid (IPv4).
@@ -29,24 +30,21 @@ def validate_ip(ip):
         bool: True if valid, False otherwise.
     """
     # TODO: Implement logic to check IP address format (e.g., 192.168.0.1)
-
-
     parts = ip.split(".")
 
-    if len(parts) == 4:			
+    if len(parts) == 4:			# should be 4 parts with "." as a separator
         for part in parts:
-            if part.isdigit():		
-                number = int(part)	
-                if number < 0 or number > 255:	
+            if part.isdigit():		# each part should be a number
+                number = int(part)	# convert part to integer for checking number range below
+                if number < 0 or number > 255:	# check if the number is within the range
                     print(f' Oops! {number} is out of range (0-255).')
                     return False
             else:
-                print(f"Oops! '{part}' is not a number.")	
+                print(f"Oops! '{part}' is not a number.")	# will print this if part is not a number and return False
                 return False
-        print(f'Great! {ip} is a valid IPv4 address.')	
-        return True
+        print(f'Great! {ip} is a valid IPv4 address.')		# if all parts are valid, return True
     else:
-        print('Oops! IP address must have 4 numbers separated by dots.')	
+        print('Oops! IP address must have 4 numbers separated by dots.')	# return False if not valid IPv4 address
         return False
 
 
