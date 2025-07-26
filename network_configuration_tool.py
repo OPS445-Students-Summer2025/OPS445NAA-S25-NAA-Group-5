@@ -50,7 +50,6 @@ def validate_ip(ip):
         return False
 
 
-
 # ----------------------------
 # Function 2: Backup Config File
 # ----------------------------
