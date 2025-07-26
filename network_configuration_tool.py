@@ -39,6 +39,7 @@ def validate_ip(ip):
                     print(f' Oops: {number} is out of range (0-255).')
                     return False
             else:
+pass
 
 
 # ----------------------------
