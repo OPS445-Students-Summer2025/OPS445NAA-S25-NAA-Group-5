@@ -47,7 +47,6 @@ def validate_ip(ip):
         print('Oops! IP address must have 4 numbers separated by dots.')	# return False if not valid IPv4 address
         return False
 
-
 # ----------------------------
 # Function 2: Backup Config File
 # ----------------------------
