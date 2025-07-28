@@ -29,5 +29,10 @@ def change_network_mode(file_path, mode, ip=None):
     		stripped = line.strip()
 
 
+        # Write Changes back to the file
+        with open(file_path, 'w') as file:
+                file.writelines(new_lines)
 
+        # Message
+        print(f"Network configuration updated to {mode} mode.")
 
