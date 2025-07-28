@@ -16,6 +16,18 @@ def change_network_mode(file_path, mode, ip=None):
 	# Read the file
 	with open(file_path, 'r') as file:
     		lines = file.readlines()
+	
+	# Tracking
+	new_lines = []
+	in_ipv4 = False
+	method_changed = False
+	address_set = False
+	dns_set = False
+
+	# Process each line
+	for line in lines:
+    		stripped = line.strip()
+
 
 
 
