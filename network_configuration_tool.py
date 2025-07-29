@@ -46,6 +46,40 @@ def backup_file(file_path):
         - Check if the file exists.
         - Copy it to a new file with '.bak' extension.
     """
+
+
+    response = input("Would you like to create a backup of your network config file? (Y/N): ")
+    response = response.strip().lower()
+
+    if response not in ("y", "yes"):
+        print("Backup skipped.")
+        return None
+
+    # Proceed with backup
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+
+    backup_dir = os.path.expanduser("~/backups")
+    os.makedirs(backup_dir, exist_ok=True)
+
+    backup_path = os.path.join(backup_dir, os.path.basename(file_path) + ".bak")
+
+    try:
+        shutil.copy2(file_path, backup_path)
+    except PermissionError as exc:
+        # This could happen if you can't read the source file.
+        print(f"Backup failed due to permissions: {exc}")
+        return None
+    except OSError as exc:
+        print(f"Backup failed: {exc}")
+        return None
+
+    print(f"Backup created at: {backup_path}")
+    return backup_path
+
+
+
+
     # TODO: Use shutil to copy the file safely
     pass
 
