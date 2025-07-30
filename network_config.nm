@@ -1,0 +1,11 @@
+[connection]
+id=Ethernet connection 1
+uuid=abc123
+type=ethernet
+autoconnect=true
+
+[ipv4]
+method=auto
+
+[ipv6]
+method=auto
