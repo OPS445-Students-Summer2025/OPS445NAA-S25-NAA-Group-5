@@ -30,6 +30,7 @@ def validate_ip(ip):
         bool: True if valid, False otherwise.
     """
     # TODO: Implement logic to check IP address format (e.g., 192.168.0.1)
+
     parts = ip.split(".")
 
     if len(parts) == 4:			# should be 4 parts with "." as a separator
@@ -43,6 +44,7 @@ def validate_ip(ip):
                 print(f"Oops! '{part}' is not a number.")	# will print this if part is not a number and return False
                 return False
         print(f'Great! {ip} is a valid IPv4 address.')		# if all parts are valid, return True
+        return True
     else:
         print('Oops! IP address must have 4 numbers separated by dots.')	# return False if not valid IPv4 address
         return False
