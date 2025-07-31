@@ -31,7 +31,7 @@ def validate_ip(ip):
     """
     # TODO: Implement logic to check IP address format (e.g., 192.168.0.1)
 
-parts = ip.split(".")  				# Split IP by dots into 4 parts
+    parts = ip.split(".")  				# Split IP by dots into 4 parts
 
     if len(parts) == 4:  				# Check if there are exactly 4 parts
         for part in parts:  				# Loop through each part
