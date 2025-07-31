@@ -18,6 +18,10 @@ import subprocess
 # ----------------------------
 # Function 1: Validate IP Address
 # ----------------------------
+<<<<<<< HEAD
+=======
+
+>>>>>>> development
 def validate_ip(ip):
     """
     Checks if the given IP address is valid (IPv4).
@@ -29,21 +33,26 @@ def validate_ip(ip):
         bool: True if valid, False otherwise.
     """
     # TODO: Implement logic to check IP address format (e.g., 192.168.0.1)
-    parts = ip.split(".")
 
-    if len(parts) == 4:			# should be 4 parts with "." as a separator
-        for part in parts:
-            if part.isdigit():		# each part should be a number
-                number = int(part)	# convert part to integer for checking number range below
-                if number < 0 or number > 255:	# check if the number is within the range
-                    print(f' Oops! {number} is out of range (0-255).')
+    parts = ip.split(".")  				# Split IP by dots into 4 parts
+
+    if len(parts) == 4:  				# Check if there are exactly 4 parts
+        for part in parts:  				# Loop through each part
+            if part.isdigit():  			# Check if part is a number
+                if part.startswith("0") and len(part) > 1:  # Reject leading zeros (e.g., '01')
+                    print(f"Oops! '{part}' should not have leading zeros.")
                     return False
-            else:
-                print(f"Oops! '{part}' is not a number.")	# will print this if part is not a number and return False
+                number = int(part)  			# Convert part to integer
+                if number < 0 or number > 255:  	# Check range 0–255
+                    print(f"Oops! {number} is out of range (0–255).")
+                    return False
+            else:  					# Part is not a number
+                print(f"Oops! '{part}' is not a number.")
                 return False
-        print(f'Great! {ip} is a valid IPv4 address.')		# if all parts are valid, return True
-    else:
-        print('Oops! IP address must have 4 numbers separated by dots.')	# return False if not valid IPv4 address
+        print(f"Great! {ip} is a valid IPv4 address.")  # All checks passed
+        return True
+    else:  						# Not exactly 4 parts
+        print("Oops! IP address must have 4 numbers separated by dots.")
         return False
 
 # ----------------------------
@@ -60,6 +69,41 @@ def backup_file(file_path):
         - Check if the file exists.
         - Copy it to a new file with '.bak' extension.
     """
+
+
+    response = input("Would you like to create a backup of your network config file? (Y/N): ")
+    response = response.strip().lower()
+
+    if response not in ("y", "yes"):
+        print("Backup skipped.")
+        return None
+
+    # Proceed with backup
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+
+    backup_dir = os.path.expanduser("~/backups")
+    os.makedirs(backup_dir, exist_ok=True)
+
+    backup_path = os.path.join(backup_dir, os.path.basename(file_path) + ".bak")
+
+    try:
+        shutil.copy2(file_path, backup_path)
+    except PermissionError as exc:
+        # This could happen if you can't read the source file.
+        print(f"Backup failed due to permissions: {exc}")
+        return None
+    except OSError as exc:
+        print(f"Backup failed: {exc}")
+        return None
+
+    print(f"Backup created at: {backup_path}")
+    return backup_path
+
+
+
+
+>>>>>>> development
     # TODO: Use shutil to copy the file safely
     pass
 
@@ -68,6 +112,7 @@ def backup_file(file_path):
 # Function 3: Change Network Mode (static/dhcp)
 # ----------------------------
 def change_network_mode(file_path, mode, ip=None):
+<<<<<<< HEAD
     """
     Changes the network mode to either static or dhcp.
 
@@ -83,11 +128,87 @@ def change_network_mode(file_path, mode, ip=None):
     """
     # TODO: Read the file, modify lines, and write back changes
     pass
+=======
+
+        # Check if the file exists
+        if not os.path.exists(file_path):
+                print(f"Error: File {file_path} does not exist.")
+                return
+
+        # Validate static mode input
+        if mode == "static" and not ip:
+                print("Error: Static mode requires an IP address.")
+                return
+
+        # Backup file
+        backup_file(file_path)
+
+        # Read the file
+        with open(file_path, 'r') as file:
+                lines = file.readlines()
+
+        # Tracking
+        new_lines = []
+        in_ipv4 = False
+
+        # Process each line
+        for line in lines:
+                stripped = line.strip()
+
+        # Check ipv4
+                if stripped == "[ipv4]":
+                        in_ipv4 = True
+                        new_lines.append(line)
+                        continue
+
+                elif stripped.startswith("[") and stripped != "[ipv4]":
+                        in_ipv4 = False
+
+
+
+        # Modify ipv4
+                if in_ipv4:
+                        if stripped.startswith("method="):
+                                if mode =="dhcp":
+                                        new_lines.append("method=auto\n")
+                                else:
+                                        new_lines.appned("method=manual\n")
+                        elif stripped.startswith("address1="):
+                                if mode == "static" and ip:
+                                        new_lines.append(f"address1={ip}\n")
+                                elif mode == "dchp":
+
+                                        continue
+
+                                else:
+                                        new_lines.append(line)
+                        elif stripped.startswith("dns="):
+                                if mode == "static":
+                                new_lines.append("dns=8.8.8.8.8;\n"
+                                elif mode == "dhcp":
+
+                                        continue
+                                else:
+                                        new_lines.append(line)
+                        else:
+                                new_lines.append(line)
+                else:
+                        new_lines.append(line)
+
+
+        # Write Changes back to the file
+        with open(file_path, 'w') as file:
+                file.writelines(new_lines)
+
+        # Message
+        print(f"Network configuration updated to {mode} mode.")
+>>>>>>> development
 
 
 # ----------------------------
 # Function 4: Test Connectivity (Ping)
 # ----------------------------
+<<<<<<< HEAD
 def test_ping(target):
     """
     Pings a target IP address to test internet/network connectivity.
@@ -103,6 +224,33 @@ def test_ping(target):
     pass
 
 
+=======
+
+def test_ping(target):
+    """
+    Ping a target IP or hostname to test connectivity.
+    Sends 2 ICMP echo requests using 'ping -c 2'.
+    """
+    print(f"\n📡 Pinging {target} using  ping...\n")
+
+    # Use '-c 2' for 2 pings on Linux
+    result = subprocess.run(['ping', '-c', '2', target], capture_output=True, text=True)
+
+    # Run the ping command on Windows
+    # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
+    
+    # Show ping command output
+    print(result.stdout)
+
+    # Check if ping was unsuccessful
+    if result.returncode != 0:
+        print("Ping failed: No response from target.")
+    else:
+        print("Ping successful!")
+ 
+    # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
+    pass
+>>>>>>> development
 # ----------------------------
 # Main Function with Argument Parser
 # ----------------------------
@@ -126,6 +274,33 @@ def main():
 
     # Subcommand: backup
     parser_backup = subparsers.add_parser("backup", help="Backup a network config file")
+<<<<<<< HEAD
+=======
+    parser_change = subparsers.add_parser("change", help="Change network mode (static/dhcp)")
+    parser_change.add_argument("file", help="Path to the config file")
+    parser_change.add_argument("mode", choices=["static", "dhcp"], help="Network mode to set")
+    parser_change.add_argument("--ip", help="Static IP address (required for static mode)")
+
+    # Subcommand: ping
+    parser_ping = subparsers.add_parser("ping", help="Ping a target to test connectivity")
+    parser_ping.add_argument("--target", default="8.8.8.8", help="Target IP to ping")
+
+    args = parser.parse_args()
+
+    # TODO: Call the appropriate function based on command
+    if args.command == "validate":
+        pass  # Call validate_ip()
+
+    elif args.command == "backup":
+        pass  # Call backup_file()
+
+    elif args.command == "change":
+        pass  # Call change_network_mode()
+
+    elif args.command == "ping":
+        pass  # Call test_ping()
+
+>>>>>>> development
     parser_backup.add_argument("file", help="Path to the file to back up")
 
     # Subcommand: change
