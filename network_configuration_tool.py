@@ -18,10 +18,7 @@ import subprocess
 # ----------------------------
 # Function 1: Validate IP Address
 # ----------------------------
-<<<<<<< HEAD
-=======
 
->>>>>>> development
 def validate_ip(ip):
     """
     Checks if the given IP address is valid (IPv4).
@@ -61,10 +58,8 @@ def validate_ip(ip):
 def backup_file(file_path):
     """
     Creates a backup of the given network config file.
-
     Arguments:
         file_path (str): Path to the config file to back up.
-
     Behavior:
         - Check if the file exists.
         - Copy it to a new file with '.bak' extension.
@@ -103,7 +98,6 @@ def backup_file(file_path):
 
 
 
->>>>>>> development
     # TODO: Use shutil to copy the file safely
     pass
 
@@ -112,23 +106,6 @@ def backup_file(file_path):
 # Function 3: Change Network Mode (static/dhcp)
 # ----------------------------
 def change_network_mode(file_path, mode, ip=None):
-<<<<<<< HEAD
-    """
-    Changes the network mode to either static or dhcp.
-
-    Arguments:
-        file_path (str): Path to the network config file.
-        mode (str): 'static' or 'dhcp'.
-        ip (str, optional): Required if mode is static.
-
-    Behavior:
-        - Backup the original file first.
-        - Modify lines related to BOOTPROTO and IPADDR.
-        - Save the changes.
-    """
-    # TODO: Read the file, modify lines, and write back changes
-    pass
-=======
 
         # Check if the file exists
         if not os.path.exists(file_path):
@@ -202,29 +179,11 @@ def change_network_mode(file_path, mode, ip=None):
 
         # Message
         print(f"Network configuration updated to {mode} mode.")
->>>>>>> development
 
 
 # ----------------------------
 # Function 4: Test Connectivity (Ping)
 # ----------------------------
-<<<<<<< HEAD
-def test_ping(target):
-    """
-    Pings a target IP address to test internet/network connectivity.
-
-    Arguments:
-        target (str): The IP address or hostname to ping.
-
-    Behavior:
-        - Use subprocess to run 'ping' command.
-        - Show output.
-    """
-    # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
-    pass
-
-
-=======
 
 def test_ping(target):
     """
@@ -238,7 +197,7 @@ def test_ping(target):
 
     # Run the ping command on Windows
     # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
-    
+
     # Show ping command output
     print(result.stdout)
 
@@ -247,17 +206,15 @@ def test_ping(target):
         print("Ping failed: No response from target.")
     else:
         print("Ping successful!")
- 
+
     # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
     pass
->>>>>>> development
 # ----------------------------
 # Main Function with Argument Parser
 # ----------------------------
 def main():
     """
     Main function to handle command line arguments and call appropriate functions.
-
     Commands supported:
         - validate <ip>
         - backup <file_path>
@@ -274,8 +231,6 @@ def main():
 
     # Subcommand: backup
     parser_backup = subparsers.add_parser("backup", help="Backup a network config file")
-<<<<<<< HEAD
-=======
     parser_change = subparsers.add_parser("change", help="Change network mode (static/dhcp)")
     parser_change.add_argument("file", help="Path to the config file")
     parser_change.add_argument("mode", choices=["static", "dhcp"], help="Network mode to set")
@@ -300,7 +255,6 @@ def main():
     elif args.command == "ping":
         pass  # Call test_ping()
 
->>>>>>> development
     parser_backup.add_argument("file", help="Path to the file to back up")
 
     # Subcommand: change
