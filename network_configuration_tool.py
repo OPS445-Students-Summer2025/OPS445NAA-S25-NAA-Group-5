@@ -46,11 +46,10 @@ def backup_file(file_path):
         - Check if the file exists.
         - Copy it to a new file with '.bak' extension.
     """
-<<<<<<< Updated upstream
+
     # TODO: Use shutil to copy the file safely
     pass
 
-=======
     # Proceed with backup
     if not os.path.isfile(file_path):
         raise FileNotFoundError(f"The file '{file_path}' does not exist.")
@@ -72,7 +71,6 @@ def backup_file(file_path):
 
     print(f"Backup created at: {backup_path}")
     return backup_path
->>>>>>> Stashed changes
 
 # ----------------------------
 # Function 3: Change Network Mode (static/dhcp)
@@ -92,25 +90,23 @@ def change_network_mode(file_path, mode, ip=None):
         - Modify lines related to BOOTPROTO and IPADDR.
         - Save the changes.
     """
-    # TODO: Read the file, modify lines, and write back changes
-    pass
-=======
+
         # Check if the file exists
-        if not os.path.exists(file_path):
-                print(f"Error: File {file_path} does not exist.")
-                return False
+    if not os.path.exists(file_path):
+            print(f"Error: File {file_path} does not exist.")
+            return False
 
         # Validate static mode input
-        if mode == "static" and not ip:
-                print("Error: Static mode requires an IP address.")
-                return
+    if mode == "static" and not ip:
+            print("Error: Static mode requires an IP address.")
+            return
 
         # Backup file
-        backup_file(file_path)
+    backup_file(file_path)
 
         # Read the file
-        with open(file_path, 'r') as file:
-                lines = file.readlines()
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
 
         # Tracking
         new_lines = []
@@ -167,7 +163,7 @@ def change_network_mode(file_path, mode, ip=None):
 
         # Message
         print(f"Network configuration updated to {mode} mode.")
->>>>>>> Stashed changes
+
 
 
 # ----------------------------
@@ -184,10 +180,7 @@ def test_ping(target):
         - Use subprocess to run 'ping' command.
         - Show output.
     """
-<<<<<<< Updated upstream
-    # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
-    pass
-=======
+
     print(f"\n📡 Pinging {target} using  ping...\n")
 
     # Use '-c 2' for 2 pings on Linux
@@ -204,8 +197,6 @@ def test_ping(target):
         print("Ping failed: No response from target.")
     else:
         print("Ping successful!")
->>>>>>> Stashed changes
-
 
 # ----------------------------
 # Main Function with Argument Parser
@@ -265,8 +256,8 @@ def main():
         # Restart NetworkManager to apply changes
         print("Restarting NetworkManager to apply new changes")
         flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
-        down = subprocess.run(["sudo", "nmcli", "connection", "down", "'Wired Connection 1'"])
-        up = subprocess.run(["sudo", "nmcli", "connection", "up", "'Wired Connection 1'"])
+        down = subprocess.run(["sudo", "nmcli", "connection", "down", "Wired Connection 1"])
+        up = subprocess.run(["sudo", "nmcli", "connection", "up", "Wired Connection 1"])
 
     elif args.command == "ping":
         if not test_ping(args.target):
