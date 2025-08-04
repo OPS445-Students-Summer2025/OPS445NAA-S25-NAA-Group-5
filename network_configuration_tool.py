@@ -191,33 +191,40 @@ def change_network_mode(file_path, mode, ip=None):
 ... # ----------------------------
 ... 
 ... def test_ping(target):
-...     """
-...     Ping a target IP or hostname to test connectivity.
-...     Sends 2 ICMP echo requests using 'ping -c 2' on Linux.
-...     Returns True if ping is successful, False otherwise.
-...     """
-...     print(f"\n📡 Pinging {target} using ping...\n")
-... 
-...     try:
-...         # For Linux/Mac
-...         result = subprocess.run(['ping', '-c', '2', target], capture_output=True, text=True)
-...         
-...         # Uncomment this for Windows instead:
-...         # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
-... 
-...         # Show ping output
-...         print(result.stdout)
-... 
-...         if result.returncode == 0:
-...             print("Ping successful!")
-...             return True
-...         else:
-...             print("Ping failed: No response from target.")
-...             return False
-... 
-...     except TypeError:
-...         print("Invalid input: target must be a string.")
-...         return False
+    """
+    Pings a target IP address to test internet/network connectivity.
+
+    Arguments:
+        target (str): The IP address or hostname to ping.
+
+    Behavior:
+        - Use subprocess to run 'ping' command.
+        - Show output.
+    """
+
+    try:
+        print(f"\n📡 Pinging {target} using  ping...\n")
+
+        # Use '-c 2' for 2 pings on Linux
+        result = subprocess.run(['ping', '-c', '2', target], capture_output=True, text=True)
+
+        # Run the ping command on Windows
+        # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
+    
+        # Show ping command output
+        print(result.stdout)
+
+        # Check if ping was unsuccessful
+        if result.returncode != 0:
+            print("Ping failed: No response from target.")
+            return False
+        else:
+            print("Ping successful!")
+            return True
+    except TypeError:
+         print("Invalid input: target must be a string.")
+         return False
+
 ... 
 ... # ----------------------------
 ... # Main Function with Argument Parser
@@ -341,3 +348,4 @@ def change_network_mode(file_path, mode, ip=None):
 # ----------------------------
 if __name__ == "__main__":
     main()
+
