@@ -1,3 +1,6 @@
+Python 3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)] on win32
+Enter "help" below or click "Help" above for more information.
+
 # assignment2.py
 
 """
@@ -168,62 +171,67 @@ def change_network_mode(file_path, mode, ip=None):
 
                                         continue
                                 else:
-                                        new_lines.append(line)
-                        else:
-                                new_lines.append(line)
-                else:
-                        new_lines.append(line)
-
-
-        # Write Changes back to the file
-        with open(file_path, 'w') as file:
-                file.writelines(new_lines)
-
-        # Message
-        print(f"Network configuration updated to {mode} mode.")
-
-
-# ----------------------------
-# Function 4: Test Connectivity (Ping)
-# ----------------------------
-
-def test_ping(target):
-    """
-    Ping a target IP or hostname to test connectivity.
-    Sends 2 ICMP echo requests using 'ping -c 2'.
-    """
-    print(f"\n📡 Pinging {target} using  ping...\n")
-
-    # Use '-c 2' for 2 pings on Linux
-    result = subprocess.run(['ping', '-c', '2', target], capture_output=True, text=True)
-
-    # Run the ping command on Windows
-    # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
-    
-    # Show ping command output
-    print(result.stdout)
-
-    # Check if ping was unsuccessful
-    if result.returncode != 0:
-        print("Ping failed: No response from target.")
-    else:
-        print("Ping successful!")
- 
-    # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
-    pass
-# ----------------------------
-# Main Function with Argument Parser
-# ----------------------------
-def main():
-    """
-    Main function to handle command line arguments and call appropriate functions.
-
-    Commands supported:
-        - validate <ip>
-        - backup <file_path>
-        - change <file_path> <mode> [--ip <ip_address>]
-        - ping [--target <ip>]
-    """
+...                                         new_lines.append(line)
+...                         else:
+...                                 new_lines.append(line)
+...                 else:
+...                         new_lines.append(line)
+... 
+... 
+...         # Write Changes back to the file
+...         with open(file_path, 'w') as file:
+...                 file.writelines(new_lines)
+... 
+...         # Message
+...         print(f"Network configuration updated to {mode} mode.")
+... 
+... 
+... # ----------------------------
+... # Function 4: Test Connectivity (Ping)
+... # ----------------------------
+... 
+... def test_ping(target):
+...     """
+...     Ping a target IP or hostname to test connectivity.
+...     Sends 2 ICMP echo requests using 'ping -c 2' on Linux.
+...     Returns True if ping is successful, False otherwise.
+...     """
+...     print(f"\n📡 Pinging {target} using ping...\n")
+... 
+...     try:
+...         # For Linux/Mac
+...         result = subprocess.run(['ping', '-c', '2', target], capture_output=True, text=True)
+...         
+...         # Uncomment this for Windows instead:
+...         # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
+... 
+...         # Show ping output
+...         print(result.stdout)
+... 
+...         if result.returncode == 0:
+...             print("Ping successful!")
+...             return True
+...         else:
+...             print("Ping failed: No response from target.")
+...             return False
+... 
+...     except TypeError:
+...         print("Invalid input: target must be a string.")
+...         return False
+... 
+... # ----------------------------
+... # Main Function with Argument Parser
+... # ----------------------------
+... def main():
+...     """
+...     Main function to handle command line arguments and call appropriate functions.
+... 
+...     Commands supported:
+...         - validate <ip>
+...         - backup <file_path>
+...         - change <file_path> <mode> [--ip <ip_address>]
+...         - ping [--target <ip>]
+...     """
     parser = argparse.ArgumentParser(description="Network Configuration Tool")
 
     subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
