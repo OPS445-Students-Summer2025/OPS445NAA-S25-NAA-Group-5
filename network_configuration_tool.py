@@ -46,9 +46,33 @@ def backup_file(file_path):
         - Check if the file exists.
         - Copy it to a new file with '.bak' extension.
     """
+<<<<<<< Updated upstream
     # TODO: Use shutil to copy the file safely
     pass
 
+=======
+    # Proceed with backup
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+
+    backup_dir = os.path.expanduser("~/backups")
+    os.makedirs(backup_dir, exist_ok=True)
+
+    backup_path = os.path.join(backup_dir, os.path.basename(file_path) + ".bak")
+
+    try:
+        shutil.copy2(file_path, backup_path)
+    except PermissionError as exc:
+        # This could happen if you can't read the source file.
+        print(f"Backup failed due to permissions: {exc}")
+        return None
+    except OSError as exc:
+        print(f"Backup failed: {exc}")
+        return None
+
+    print(f"Backup created at: {backup_path}")
+    return backup_path
+>>>>>>> Stashed changes
 
 # ----------------------------
 # Function 3: Change Network Mode (static/dhcp)
@@ -57,6 +81,7 @@ def change_network_mode(file_path, mode, ip=None):
     """
     Changes the network mode to either static or dhcp.
 
+<<<<<<< Updated upstream
     Arguments:
         file_path (str): Path to the network config file.
         mode (str): 'static' or 'dhcp'.
@@ -69,6 +94,80 @@ def change_network_mode(file_path, mode, ip=None):
     """
     # TODO: Read the file, modify lines, and write back changes
     pass
+=======
+        # Check if the file exists
+        if not os.path.exists(file_path):
+                print(f"Error: File {file_path} does not exist.")
+                return False
+
+        # Validate static mode input
+        if mode == "static" and not ip:
+                print("Error: Static mode requires an IP address.")
+                return
+
+        # Backup file
+        backup_file(file_path)
+
+        # Read the file
+        with open(file_path, 'r') as file:
+                lines = file.readlines()
+
+        # Tracking
+        new_lines = []
+        in_ipv4 = False
+
+        # Process each line
+        for line in lines:
+                stripped = line.strip()
+
+        # Check ipv4
+                if stripped == "[ipv4]":
+                        in_ipv4 = True
+                        new_lines.append(line)
+                        continue
+
+                elif stripped.startswith("[") and stripped != "[ipv4]":
+                        in_ipv4 = False
+
+
+
+        # Modify ipv4
+                if in_ipv4:
+                        if stripped.startswith("method="):
+                                if mode =="dhcp":
+                                        new_lines.append("method=auto\n")
+                                else:
+                                        new_lines.appned("method=manual\n")
+                        elif stripped.startswith("address1="):
+                                if mode == "static" and ip:
+                                        new_lines.append(f"address1={ip}\n")
+                                elif mode == "dchp":
+
+                                        continue
+
+                                else:
+                                        new_lines.append(line)
+                        elif stripped.startswith("dns="):
+                                if mode == "static":
+                                    new_lines.append("dns=8.8.8.8.8;\n")
+                                elif mode == "dhcp":
+
+                                        continue
+                                else:
+                                        new_lines.append(line)
+                        else:
+                                new_lines.append(line)
+                else:
+                        new_lines.append(line)
+
+
+        # Write Changes back to the file
+        with open(file_path, 'w') as file:
+                file.writelines(new_lines)
+
+        # Message
+        print(f"Network configuration updated to {mode} mode.")
+>>>>>>> Stashed changes
 
 
 # ----------------------------
@@ -85,8 +184,27 @@ def test_ping(target):
         - Use subprocess to run 'ping' command.
         - Show output.
     """
+<<<<<<< Updated upstream
     # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
     pass
+=======
+    print(f"\n📡 Pinging {target} using  ping...\n")
+
+    # Use '-c 2' for 2 pings on Linux
+    result = subprocess.run(['ping', '-c', '2', target], capture_output=True, text=True)
+
+    # Run the ping command on Windows
+    # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
+    
+    # Show ping command output
+    print(result.stdout)
+
+    # Check if ping was unsuccessful
+    if result.returncode != 0:
+        print("Ping failed: No response from target.")
+    else:
+        print("Ping successful!")
+>>>>>>> Stashed changes
 
 
 # ----------------------------
@@ -146,18 +264,16 @@ def main():
         change_network_mode(args.file, args.mode, ip=args.ip)
         # Restart NetworkManager to apply changes
         print("Restarting NetworkManager to apply new changes")
-        res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"], capture_output=True, text=True)
-        if res.returncode != 0:
-            print(f"Failed to restart NetworkManager: {res.stderr.strip()}")
-        else:
-            print("NetworkManager restarted successfully.")
+        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+        down = subprocess.run(["sudo", "nmcli", "connection", "down", "'Wired Connection 1'"])
+        up = subprocess.run(["sudo", "nmcli", "connection", "up", "'Wired Connection 1'"])
 
     elif args.command == "ping":
         if not test_ping(args.target):
             print("Ping failed: there may be an issue with the current network configuration.")
             # Attempt to restore NetworkManager config from backup
-            orig_path = "/etc/NetworkManager/NetworkManager.conf"
-            backup_path = "/etc/NetworkManager/NetworkManager.conf.bak"
+            orig_path = "/etc/NetworkManager/system-connections/'Wired Connection 1.nmconnection"
+            backup_path = orig_path + '.bak'
             if os.path.isfile(backup_path):
                 try:
                     if os.path.isfile(orig_path):
@@ -167,11 +283,10 @@ def main():
                     print(f"Restored backup configuration from {backup_path} to {orig_path}.")
                     # Restart to apply restored config
                     print("Restarting NetworkManager to apply new changes.")
-                    res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"], capture_output=True, text=True)
-                    if res.returncode != 0:
-                        print(f"ERROR: Could not restart NetworkManager.\n{res.stderr.strip()}")
-                    else:
-                        print("NetworkManager restarted successfully.")
+                    
+                    flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+                    down = subprocess.run(["sudo", "nmcli", "connection", "down", "'Wired Connection 1'"])
+                    up = subprocess.run(["sudo", "nmcli", "connection", "up", "'Wired Connection 1'"])
                 except PermissionError:
                     print("ERROR: Could not restore backup. Try running with elevated privileges.")
                 except OSError as e:
