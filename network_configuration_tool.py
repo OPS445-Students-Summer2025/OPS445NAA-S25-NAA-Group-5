@@ -272,19 +272,58 @@ def main():
 
     args = parser.parse_args()
 
-    # TODO: Call the appropriate function based on command
     if args.command == "validate":
-        pass  # Call validate_ip()
+        validate_ip(args.ip)
 
     elif args.command == "backup":
-        pass  # Call backup_file()
+        try:
+            backup_file(args.file)
+        except FileNotFoundError as e:
+            print(f"ERROR: {e}")
 
     elif args.command == "change":
-        pass  # Call change_network_mode()
+        if args.mode == "static":
+            if not args.ip:
+                print("ERROR: Static requires an IP address.")
+                return
+            if not validate_ip(args.ip):
+                print("ERROR: invalid IP provided.")
+                return
+        change_network_mode(args.file, args.mode, ip=args.ip)
+        # Restart NetworkManager to apply changes
+        print("Restarting NetworkManager to apply new changes")
+        res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"], capture_output=True, text=True)
+        if res.returncode != 0:
+            print(f"Failed to restart NetworkManager: {res.stderr.strip()}")
+        else:
+            print("NetworkManager restarted successfully.")
 
     elif args.command == "ping":
-        pass  # Call test_ping()
-
+        if not test_ping(args.target):
+            print("Ping failed: there may be an issue with the current network configuration.")
+            # Attempt to restore NetworkManager config from backup
+            orig_path = "/etc/NetworkManager/NetworkManager.conf"
+            backup_path = "/etc/NetworkManager/NetworkManager.conf.bak"
+            if os.path.isfile(backup_path):
+                try:
+                    if os.path.isfile(orig_path):
+                        os.remove(orig_path)
+                        print(f"Deleted current config at {orig_path}.")
+                    shutil.copy2(backup_path, orig_path)
+                    print(f"Restored backup configuration from {backup_path} to {orig_path}.")
+                    # Restart to apply restored config
+                    print("Restarting NetworkManager to apply new changes.")
+                    res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"], capture_output=True, text=True)
+                    if res.returncode != 0:
+                        print(f"ERROR: Could not restart NetworkManager.\n{res.stderr.strip()}")
+                    else:
+                        print("NetworkManager restarted successfully.")
+                except PermissionError:
+                    print("ERROR: Could not restore backup. Try running with elevated privileges.")
+                except OSError as e:
+                    print(f"ERROR: Failed to restore backup: {e}")
+            else:
+                print(f"No backup found at {backup_path}. Cannot restore configuration.")
     else:
         parser.print_help()
 
