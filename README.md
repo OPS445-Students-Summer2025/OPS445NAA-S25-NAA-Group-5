@@ -1,6 +1,6 @@
 # 📡 Assignment 2 - Network Configuration Tool
 
-This command-line tool helps manage and troubleshoot network settings using **Netnetwork_configuration_tool.py**.
+This command-line tool helps manage and troubleshoot network settings using **network_configuration_tool.py**.
 
 ---
 
