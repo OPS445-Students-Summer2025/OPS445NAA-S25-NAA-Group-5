@@ -24,7 +24,7 @@ This command-line tool helps manage and troubleshoot network settings using **Ne
 
 ## 🔧 Setup
 
-This will download your **Netnetwork_configuration_tool.py** locally, allowing you to run them on your command prompt.
+This will download your **Network_configuration_tool.py** locally, allowing you to use them on your command prompt.
 
 ### 1. Clone your repository into your console using SSH:
 
