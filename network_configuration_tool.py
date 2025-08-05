@@ -47,15 +47,12 @@ def backup_file(file_path):
         - Copy it to a new file with '.bak' extension.
     """
 
-    if response not in ("y", "yes"):
-        print("Backup skipped.")
-        return None
 
     # Proceed with backup
     if not os.path.isfile(file_path):
         raise FileNotFoundError(f"The file '{file_path}' does not exist.")
 
-    backup_dir = os.path.expanduser("~/backups")
+    backup_dir = "/etc/NetworkManager/system-connections"
     os.makedirs(backup_dir, exist_ok=True)
 
     backup_path = os.path.join(backup_dir, os.path.basename(file_path) + ".bak")
