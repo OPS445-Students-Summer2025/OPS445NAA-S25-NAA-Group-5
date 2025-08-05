@@ -71,9 +71,6 @@ def backup_file(file_path):
     """
 
 
-    response = input("Would you like to create a backup of your network config file? (Y/N): ")
-    response = response.strip().lower()
-
     if response not in ("y", "yes"):
         print("Backup skipped.")
         return None
@@ -348,4 +345,5 @@ def change_network_mode(file_path, mode, ip=None):
 # ----------------------------
 if __name__ == "__main__":
     main()
+
 
