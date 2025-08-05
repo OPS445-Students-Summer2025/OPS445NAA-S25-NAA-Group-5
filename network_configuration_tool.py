@@ -47,10 +47,6 @@ def backup_file(file_path):
         - Copy it to a new file with '.bak' extension.
     """
 
-
-    response = input("Would you like to create a backup of your network config file? (Y/N): ")
-    response = response.strip().lower()
-
     if response not in ("y", "yes"):
         print("Backup skipped.")
         return None
