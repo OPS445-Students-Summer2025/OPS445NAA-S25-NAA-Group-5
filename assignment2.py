@@ -181,6 +181,7 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
 def test_ping(target):
     """
     Pings a target IP address to test internet/network connectivity.
+
     Arguments:
         target (str): The IP address or hostname to ping.
 
@@ -189,9 +190,28 @@ def test_ping(target):
         - Show output.
     """
 
-    # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
-    pass
+    try:
+        print(f"\n📡 Pinging {target} using  ping...\n")
 
+        # Use '-c 2' for 2 pings on Linux
+        result = subprocess.run(['ping', '-c', '2', target], capture_output=True, text=True)
+
+        # Run the ping command on Windows
+        # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
+    
+        # Show ping command output
+        print(result.stdout)
+
+        # Check if ping was unsuccessful
+        if result.returncode != 0:
+            print("Ping failed: No response from target.")
+            return False
+        else:
+            print("Ping successful!")
+            return True
+    except TypeError:
+         print("Invalid input: target must be a string.")
+         return False
 
 # ----------------------------
 # Main Function with Argument Parser
