@@ -74,7 +74,6 @@ def change_network_mode(file_path, mode, ip=None):
 # ----------------------------
 # Function 4: Test Connectivity (Ping)
 # ----------------------------
-
 def test_ping(target):
     """
     Pings a target IP address to test internet/network connectivity.
