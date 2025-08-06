@@ -67,6 +67,9 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
                 print("Error: Static mode requires an IP address.")
                 return
 
+        # Finds the current default gateway to retain the information
+        gateway = subprocess.check_output("ip route show default | awk '/default/ {print $3}'", shell=True).decode().strip()
+
         # Backup file
         backup_file(file_path)
 
