@@ -58,6 +58,8 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
         # Check if the file exists
         if not os.path.exists(file_path):
                 print(f"Error: File {file_path} does not exist.")
+                if os.path.exists("/run/NetworkManager/system-connections/Wired connection 1.nmconnection"):
+                    shutil.copy2("/run/NetworkManager/system-connections/Wired connection 1.nmconnection", "/etc/NetworkManager/system-connections/Wired connection 1.nmconnection")
                 return
 
         # Validate static mode input
