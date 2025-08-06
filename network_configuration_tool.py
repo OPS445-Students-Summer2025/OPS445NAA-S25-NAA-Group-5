@@ -54,6 +54,17 @@ def backup_file(file_path):
 # Function 3: Change Network Mode (static/dhcp)
 # ----------------------------
 def change_network_mode(file_path, mode, ip=None, subnet=None):
+    """
+    Changes the network mode to either static or dhcp.
+    Arguments:
+        file_path (str): Path to the network config file.
+        mode (str): 'static' or 'dhcp'.
+        ip (str, optional): Required if mode is static.
+    Behavior:
+        - Backup the original file first.
+        - Modify lines related to BOOTPROTO and IPADDR.
+        - Save the changes.
+    """
 
         # Check if the file exists
         if not os.path.exists(file_path):
