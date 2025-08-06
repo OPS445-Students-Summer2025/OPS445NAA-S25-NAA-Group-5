@@ -53,7 +53,7 @@ def backup_file(file_path):
 # ----------------------------
 # Function 3: Change Network Mode (static/dhcp)
 # ----------------------------
-def change_network_mode(file_path, mode, ip=None):
+def change_network_mode(file_path, mode, ip=None, subnet=None):
 
         # Check if the file exists
         if not os.path.exists(file_path):
