@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # assignment2.py
+
 """
 Assignment 2 - Network Configuration Tool
 This script provides :
@@ -18,7 +19,9 @@ import subprocess
 # ----------------------------
 # Function 1: Validate IP Address
 # ----------------------------
+
 def validate_ip(ip, subnet):
+
     """
     Checks if the given IP address is valid (IPv4).
     
@@ -48,14 +51,17 @@ def backup_file(file_path):
     """
     # TODO: Use shutil to copy the file safely
     pass
+
     
 
 # ----------------------------
 # Function 3: Change Network Mode (static/dhcp)
 # ----------------------------
+
 def change_network_mode(file_path, mode, ip=None, subnet=None):
     """
     Changes the network mode to either static or dhcp.
+
     Arguments:
         file_path (str): Path to the network config file.
         mode (str): 'static' or 'dhcp'.
@@ -66,27 +72,29 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
         - Modify lines related to BOOTPROTO and IPADDR.
         - Save the changes.
     """
-    # TODO:
+
+    # TODO: Read the file, modify lines, and write back changes
     pass
 
 
 # ----------------------------
 # Function 4: Test Connectivity (Ping)
 # ----------------------------
+
 def test_ping(target):
     """
     Pings a target IP address to test internet/network connectivity.
     Arguments:
         target (str): The IP address or hostname to ping.
+
     Behavior:
         - Use subprocess to run 'ping' command.
         - Show output.
     """
+
     # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
     pass
 
-
-    
 # ----------------------------
 # Main Function with Argument Parser
 # ----------------------------
@@ -106,6 +114,7 @@ def main():
 
     # Subcommand: validate
     parser_validate = subparsers.add_parser("validate", help="Validate an IP address")
+
     parser_validate.add_argument("--ip", required=True, help="Requires an IP address to validate")
     parser_validate.add_argument("-s","--subnet", required=True, help="Requires a subnet to validate")
 
@@ -123,11 +132,13 @@ def main():
     parser_change.add_argument("--ip", help="Static IP address (required for static mode)")
     parser_change.add_argument("-s","--subnet", help="Missing Subnet (required for static mode)")
 
+
     # Subcommand: ping
     parser_ping = subparsers.add_parser("ping", help="Ping a target to test connectivity")
     parser_ping.add_argument("--target", default="8.8.8.8", help="Target IP to ping")
 
     args = parser.parse_args()
+
 
     # Save path for restoring
     orig_path = "/etc/NetworkManager/system-connections/Wired connection 1.nmconnection"
@@ -216,6 +227,7 @@ def main():
                 exit()
     else:
         parser.print_help()
+
 
 # ----------------------------
 # Entry Point
