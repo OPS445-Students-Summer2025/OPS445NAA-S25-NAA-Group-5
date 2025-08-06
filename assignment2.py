@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # assignment2.py
 
 """
@@ -18,7 +19,9 @@ import subprocess
 # ----------------------------
 # Function 1: Validate IP Address
 # ----------------------------
-def validate_ip(ip):
+
+def validate_ip(ip, subnet):
+
     """
     Checks if the given IP address is valid (IPv4).
     
@@ -70,6 +73,7 @@ def backup_file(file_path):
     print(f"Backup created at: {backup_path}")
     return backup_path
 
+    
 
 # ----------------------------
 # Function 3: Change Network Mode (static/dhcp)
@@ -177,7 +181,6 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
 def test_ping(target):
     """
     Pings a target IP address to test internet/network connectivity.
-
     Arguments:
         target (str): The IP address or hostname to ping.
 
@@ -186,28 +189,8 @@ def test_ping(target):
         - Show output.
     """
 
-    try:
-        print(f"\n📡 Pinging {target} using  ping...\n")
-
-        # Use '-c 2' for 2 pings on Linux
-        result = subprocess.run(['ping', '-c', '2', target], capture_output=True, text=True)
-
-        # Run the ping command on Windows
-        # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
-    
-        # Show ping command output
-        print(result.stdout)
-
-        # Check if ping was unsuccessful
-        if result.returncode != 0:
-            print("Ping failed: No response from target.")
-            return False
-        else:
-            print("Ping successful!")
-            return True
-    except TypeError:
-         print("Invalid input: target must be a string.")
-         return False
+    # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
+    pass
 
 
 # ----------------------------
@@ -229,17 +212,24 @@ def main():
 
     # Subcommand: validate
     parser_validate = subparsers.add_parser("validate", help="Validate an IP address")
-    parser_validate.add_argument("ip", help="IP address to validate")
+
+    parser_validate.add_argument("--ip", required=True, help="Requires an IP address to validate")
+    parser_validate.add_argument("-s","--subnet", required=True, help="Requires a subnet to validate")
 
     # Subcommand: backup
     parser_backup = subparsers.add_parser("backup", help="Backup a network config file")
-    parser_backup.add_argument("file", help="Path to the file to back up")
+    parser_backup.add_argument("-f","--file", required=True, help="Path to the file to back up")
+
+    # Subcommand: restore 
+    parser_restore = subparsers.add_parser("restore", help="Restore configuration from a backup")
 
     # Subcommand: change
     parser_change = subparsers.add_parser("change", help="Change network mode (static/dhcp)")
-    parser_change.add_argument("file", help="Path to the config file")
-    parser_change.add_argument("mode", choices=["static", "dhcp"], help="Network mode to set")
+    parser_change.add_argument("-f","--file", nargs='?', default="/etc/NetworkManager/system-connections/Wired connection 1.nmconnection", help="Path to the config file")
+    parser_change.add_argument("-m","--mode", choices=["static", "dhcp"], required=True, help="Network mode to set")
     parser_change.add_argument("--ip", help="Static IP address (required for static mode)")
+    parser_change.add_argument("-s","--subnet", help="Missing Subnet (required for static mode)")
+
 
     # Subcommand: ping
     parser_ping = subparsers.add_parser("ping", help="Ping a target to test connectivity")
@@ -247,19 +237,92 @@ def main():
 
     args = parser.parse_args()
 
-    # TODO: Call the appropriate function based on command
+
+    # Save path for restoring
+    orig_path = "/etc/NetworkManager/system-connections/Wired connection 1.nmconnection"
+    backup_path = orig_path + '.bak'
+
     if args.command == "validate":
-        pass  # Call validate_ip()
+        validate_ip(args.ip, args.subnet)
 
     elif args.command == "backup":
-        pass  # Call backup_file()
+        try:
+            backup_file(args.file)
+        except FileNotFoundError as e:
+            print(f"ERROR: {e}")
+
+    elif args.command == "restore":
+        try:
+            if os.path.exists(orig_path):
+                os.remove(orig_path)
+            shutil.copy2(backup_path, orig_path)
+            print("Restored configuration from backup file")
+            # Removes the runtime configuration so it loads the new one
+            if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
+                os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
+                flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+                res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+                if flush.returncode != 0 or res.returncode != 0:
+                    print("ERROR: Could not apply changes.")
+                else:
+                    print("New network configuration successfully updated.")
+
+        except FileNotFoundError:
+            print('ERROR: No backup file found')  
 
     elif args.command == "change":
-        pass  # Call change_network_mode()
+        if args.mode == "static":
+            if not args.ip:
+                print("ERROR: Static requires an IP address. Use --ip followed by the IP address")
+                return
+            if not validate_ip(args.ip, args.subnet):
+                print("ERROR: Invalid or missing IP and subnet.")
+                return
+        change_network_mode(args.file, args.mode, ip=args.ip, subnet=args.subnet)
+        # Restart NetworkManager to apply changes
+        print("Restarting NetworkManager to apply new changes")
+        # Removes the runtime configuration so it loads the new one
+        if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
+            os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
+        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+        res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+        if flush.returncode != 0 or res.returncode != 0:
+             print("ERROR: Could not apply changes.")
+        else:
+             print("New network configuration successfully updated.")
 
     elif args.command == "ping":
-        pass  # Call test_ping()
+        if not test_ping(args.target):
+            print("Ping failed: there may be an issue with the current network configuration.")
+            # Attempt to restore NetworkManager config from backup
+            
+            restore = input('\nWould you like to restore from backup? (y/n): ')
+            if restore == 'y':
+                if os.path.isfile(backup_path):
+                    try:
+                        if os.path.isfile(orig_path):
+                            os.remove(orig_path)
+                            print(f"Deleted current config at {orig_path}.")
+                        shutil.copy2(backup_path, orig_path)
+                        print(f"Restored backup configuration from {backup_path} to {orig_path}.")
+                        # Restart to apply restored config
+                        print("Restarting NetworkManager to apply new changes.")
+                        # Removes the runtime configuration so it loads the new one
+                        if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
+                            os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
+                        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+                        res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+                        if flush.returncode != 0 or res.returncode != 0:
+                            print("ERROR: Could not apply changes.")
+                        else:
+                            print("New network configuration successfully updated.")
 
+                    except PermissionError:
+                        print("ERROR: Could not restore backup. Try running with elevated privileges.")
+                    except OSError as e:
+                        print(f"ERROR: Failed to restore backup: {e}")
+            else:
+                exit()
     else:
         parser.print_help()
 
