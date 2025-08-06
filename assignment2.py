@@ -53,13 +53,16 @@ def backup_file(file_path):
 # ----------------------------
 # Function 3: Change Network Mode (static/dhcp)
 # ----------------------------
+
 def change_network_mode(file_path, mode, ip=None, subnet=None):
     """
     Changes the network mode to either static or dhcp.
+
     Arguments:
         file_path (str): Path to the network config file.
         mode (str): 'static' or 'dhcp'.
         ip (str, optional): Required if mode is static.
+
     Behavior:
         - Backup the original file first.
         - Modify lines related to IP method, address, and DNS.
@@ -148,6 +151,8 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
 # ----------------------------
 # Function 4: Test Connectivity (Ping)
 # ----------------------------
+
+
 def test_ping(target):
     """
     Pings a target IP address to test internet/network connectivity.
@@ -159,8 +164,29 @@ def test_ping(target):
         - Use subprocess to run 'ping' command.
         - Show output.
     """
-    # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
-    pass
+
+    try:
+        print(f"\n📡 Pinging {target} using  ping...\n")
+
+        # Use '-c 2' for 2 pings on Linux
+        result = subprocess.run(['ping', '-c', '2', target], capture_output=True, text=True)
+
+        # Run the ping command on Windows
+        # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
+    
+        # Show ping command output
+        print(result.stdout)
+
+        # Check if ping was unsuccessful
+        if result.returncode != 0:
+            print("Ping failed: No response from target.")
+            return False
+        else:
+            print("Ping successful!")
+            return True
+    except TypeError:
+         print("Invalid input: target must be a string.")
+         return False
 
 
 # ----------------------------
