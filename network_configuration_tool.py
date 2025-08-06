@@ -106,11 +106,11 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
                                 if mode =="dhcp":
                                         new_lines.append("method=auto\n")
                                 else:
-                                        new_lines.appned("method=manual\n")
+                                        new_lines.append("method=manual\n")
                         elif stripped.startswith("address1="):
                                 if mode == "static" and ip:
                                         new_lines.append(f"address1={ip}\n")
-                                elif mode == "dchp":
+                                elif mode == "dhcp":
 
                                         continue
 
@@ -118,7 +118,7 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
                                         new_lines.append(line)
                         elif stripped.startswith("dns="):
                                 if mode == "static":
-                                new_lines.append("dns=8.8.8.8.8;\n"
+                                new_lines.append("dns=8.8.8.8.8;1.1.1.1\n"
                                 elif mode == "dhcp":
 
                                         continue
