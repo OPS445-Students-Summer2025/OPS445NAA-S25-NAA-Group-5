@@ -67,44 +67,44 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
     """
 
         # Check if the file exists
-        if not os.path.exists(file_path):
-                print(f"Error: File {file_path} does not exist.")
-                if os.path.exists("/run/NetworkManager/system-connections/Wired connection 1.nmconnection"):
-                    shutil.copy2("/run/NetworkManager/system-connections/Wired connection 1.nmconnection", "/etc/NetworkManager/system-connections/Wired connection 1.nmconnection")
-                return
+    if not os.path.exists(file_path):
+            print(f"Error: File {file_path} does not exist.")
+            if os.path.exists("/run/NetworkManager/system-connections/Wired connection 1.nmconnection"):
+                shutil.copy2("/run/NetworkManager/system-connections/Wired connection 1.nmconnection", "/etc/NetworkManager/system-connections/Wired connection 1.nmconnection")
+            return
 
         # Validate static mode input
-        if mode == "static" and not ip:
-                print("Error: Static mode requires an IP address.")
-                return
+    if mode == "static" and not ip:
+            print("Error: Static mode requires an IP address.")
+            return
 
         # Finds the current default gateway to retain the information
-        gateway = subprocess.check_output("ip route show default | awk '/default/ {print $3}'", shell=True).decode().strip()
+    gateway = subprocess.check_output("ip route show default | awk '/default/ {print $3}'", shell=True).decode().strip()
 
         # Backup file
-        backup_file(file_path)
+    backup_file(file_path)
 
         # Read the file
-        with open(file_path, 'r') as file:
-                lines = file.readlines()
+    with open(file_path, 'r') as file:
+            lines = file.readlines()
 
         # Tracking
-        new_lines = []
-        in_ipv4 = False
+    new_lines = []
+    in_ipv4 = False
 
         # Process each line
-        for line in lines:
-                stripped = line.strip()
+    for line in lines:
+        stripped = line.strip()
 
         # Check ipv4
-                if stripped == "[ipv4]":
-                        in_ipv4 = True
-                        new_lines.append(line)
-                        if mode == "static" and ip and not any("address1=" in l for l in new_lines):
-                            new_lines.append("method=manual\n")
-                            new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
-                            new_lines.append("dns=8.8.8.8;1.1.1.1\n")
-                        continue
+        if stripped == "[ipv4]":
+                in_ipv4 = True
+                new_lines.append(line)
+                if mode == "static" and ip and not any("address1=" in l for l in new_lines):
+                    new_lines.append("method=manual\n")
+                    new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
+                    new_lines.append("dns=8.8.8.8;1.1.1.1\n")
+                continue
 
                 elif stripped.startswith("[") and stripped != "[ipv4]":
                         in_ipv4 = False
@@ -112,33 +112,30 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
 
 
         # Modify ipv4
-                if in_ipv4:
-                        if stripped.startswith("method="):
-                                if mode =="dhcp":
-                                        new_lines.append("method=auto\n")
-                                else:
-                                        new_lines.append("method=manual\n")
-                        elif stripped.startswith("address1="):
-                                if mode == "static" and ip:
-                                        new_lines.append(f"address1={ip}\n")
-                                elif mode == "dhcp":
-
-                                        continue
-
-                                else:
-                                        new_lines.append(line)
-                        elif stripped.startswith("dns="):
-                                if mode == "static":
-                                new_lines.append("dns=8.8.8.8.8;1.1.1.1\n"
-                                elif mode == "dhcp":
-
-                                        continue
-                                else:
-                                        new_lines.append(line)
+            if in_ipv4:
+                if stripped.startswith("method="):
+                        if mode =="dhcp":
+                                new_lines.append("method=auto\n")
                         else:
-                                new_lines.append(line)
-                else:
+                                new_lines.append("method=manual\n")
+                elif stripped.startswith("address1="):
+                        if mode == "static" and ip:
+                                new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
+                        elif mode == "dhcp":
+                            continue
+                        else:
+                            new_lines.append(line)
+                    elif stripped.startswith("dns="):
+                        if mode == "static":
+                                new_lines.append("dns=8.8.8.8;1.1.1.1\n")
+                        elif mode == "dhcp":
+                            continue
+                        else:
+                            new_lines.append(line)
+                    else:
                         new_lines.append(line)
+                else:
+                    new_lines.append(line)
 
 
         # Write Changes back to the file
