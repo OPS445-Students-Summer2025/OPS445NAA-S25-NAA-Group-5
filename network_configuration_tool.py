@@ -18,8 +18,7 @@ import subprocess
 # ----------------------------
 # Function 1: Validate IP Address
 # ----------------------------
-
-def validate_ip(ip):
+def validate_ip(ip, subnet):
     """
     Checks if the given IP address is valid (IPv4).
     
@@ -29,28 +28,36 @@ def validate_ip(ip):
     Returns:
         bool: True if valid, False otherwise.
     """
-    # TODO: Implement logic to check IP address format (e.g., 192.168.0.1)
+    parts = ip.split(".")                                                   # Split IP by dots into 4 parts
 
-    parts = ip.split(".")  				# Split IP by dots into 4 parts
-
-    if len(parts) == 4:  				# Check if there are exactly 4 parts
-        for part in parts:  				# Loop through each part
-            if part.isdigit():  			# Check if part is a number
-                if part.startswith("0") and len(part) > 1:  # Reject leading zeros (e.g., '01')
-                    print(f"Oops! '{part}' should not have leading zeros.")
-                    return False
-                number = int(part)  			# Convert part to integer
-                if number < 0 or number > 255:  	# Check range 0–255
-                    print(f"Oops! {number} is out of range (0–255).")
-                    return False
-            else:  					# Part is not a number
-                print(f"Oops! '{part}' is not a number.")
-                return False
-        print(f"Great! {ip} is a valid IPv4 address.")  # All checks passed
-        return True
-    else:  						# Not exactly 4 parts
-        print("Oops! IP address must have 4 numbers separated by dots.")
+    if len(parts) != 4:                                                     # Check if there are exactly 4 parts
+        print("Oops! IP address must have 4 numbers separated by dots.")   
         return False
+
+    for part in parts:                                                      # Loop through each part
+        if not part.isdigit():
+            print(f"Oops! '{part}' is not a number.")                       # Check if part is a number
+            return False
+        if part.startswith("0") and len(part) > 1:                          # Rejecting leading zeros (e.g., '01)
+            print(f"Oops! '{part}' should not have leading zeros.")
+            return False
+        number = int(part)                                                  # Convert part to integer
+        if number < 0 or number > 255:                                      # Check range 0-255
+            print(f"Oops! {number} is out of range (0–255).")
+            return False
+
+    # Validate subnet if provided
+    try:
+        subnet_int = int(subnet)
+        if subnet_int < 0 or subnet_int > 32:
+            print("Oops! Subnet mask must be between 0 and 32.")
+            return False
+    except (ValueError, TypeError):
+        print("Oops! Subnet mask must be an integer.")
+        return False
+    
+    print(f"Great! {ip}/{subnet} is a valid IPv4 address with subnet.")
+    return True
 
 # ----------------------------
 # Function 2: Backup Config File
@@ -67,19 +74,11 @@ def backup_file(file_path):
         - Copy it to a new file with '.bak' extension.
     """
 
-
-    response = input("Would you like to create a backup of your network config file? (Y/N): ")
-    response = response.strip().lower()
-
-    if response not in ("y", "yes"):
-        print("Backup skipped.")
-        return None
-
     # Proceed with backup
     if not os.path.isfile(file_path):
         raise FileNotFoundError(f"The file '{file_path}' does not exist.")
 
-    backup_dir = os.path.expanduser("~/backups")
+    backup_dir = "/etc/NetworkManager/system-connections"
     os.makedirs(backup_dir, exist_ok=True)
 
     backup_path = os.path.join(backup_dir, os.path.basename(file_path) + ".bak")
@@ -97,34 +96,47 @@ def backup_file(file_path):
     print(f"Backup created at: {backup_path}")
     return backup_path
 
-
-
-
-    # TODO: Use shutil to copy the file safely
-    pass
-
-
 # ----------------------------
 # Function 3: Change Network Mode (static/dhcp)
 # ----------------------------
-def change_network_mode(file_path, mode, ip=None):
+def change_network_mode(file_path, mode, ip=None, subnet=None):
+    """
+    Changes the network mode to either static or dhcp.
+
+<<<<<<< Updated upstream
+    Arguments:
+        file_path (str): Path to the network config file.
+        mode (str): 'static' or 'dhcp'.
+        ip (str, optional): Required if mode is static.
+
+    Behavior:
+        - Backup the original file first.
+        - Modify lines related to BOOTPROTO and IPADDR.
+        - Save the changes.
+    """
 
         # Check if the file exists
-        if not os.path.exists(file_path):
-                print(f"Error: File {file_path} does not exist.")
-                return
+    if not os.path.exists(file_path):
+            print(f"Error: File {file_path} does not exist.")
+            # Copies the current runtime config file to /etc/ directory for persistent changes
+            if os.path.exists("/run/NetworkManager/system-connections/Wired connection 1.nmconnection"):
+                 shutil.copy2("/run/NetworkManager/system-connections/Wired connection 1.nmconnection","/etc/NetworkManager/system-connections/Wired connection 1.nmconnection")
+            return
 
         # Validate static mode input
-        if mode == "static" and not ip:
-                print("Error: Static mode requires an IP address.")
-                return
+    if mode == "static" and not ip:
+            print("Error: Static mode requires an IP address.")
+            return
+
+    # Finds the current default gateway to retain the information
+    gateway = subprocess.check_output("ip route show default | awk '/default/ {print $3}'", shell=True).decode().strip()
 
         # Backup file
-        backup_file(file_path)
+    backup_file(file_path)
 
         # Read the file
-        with open(file_path, 'r') as file:
-                lines = file.readlines()
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
 
         # Tracking
         new_lines = []
@@ -138,12 +150,15 @@ def change_network_mode(file_path, mode, ip=None):
                 if stripped == "[ipv4]":
                         in_ipv4 = True
                         new_lines.append(line)
+                        if mode == "static" and ip and not any("address=" in l for l in new_lines):
+                             new_lines.append("method=manual\n")
+                             new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
+                             new_lines.append('dns=8.8.8.8;1.1.1.1\n')
                         continue
+                        
 
                 elif stripped.startswith("[") and stripped != "[ipv4]":
                         in_ipv4 = False
-
-
 
         # Modify ipv4
                 if in_ipv4:
@@ -151,11 +166,11 @@ def change_network_mode(file_path, mode, ip=None):
                                 if mode =="dhcp":
                                         new_lines.append("method=auto\n")
                                 else:
-                                        new_lines.appned("method=manual\n")
+                                        new_lines.append("method=manual\n")
                         elif stripped.startswith("address1="):
                                 if mode == "static" and ip:
-                                        new_lines.append(f"address1={ip}\n")
-                                elif mode == "dchp":
+                                        new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
+                                elif mode == "dhcp":
 
                                         continue
 
@@ -163,58 +178,31 @@ def change_network_mode(file_path, mode, ip=None):
                                         new_lines.append(line)
                         elif stripped.startswith("dns="):
                                 if mode == "static":
-                                new_lines.append("dns=8.8.8.8.8;\n"
+                                    new_lines.append("dns=8.8.8.8;1.1.1.1\n")
                                 elif mode == "dhcp":
 
                                         continue
                                 else:
-...                                         new_lines.append(line)
-...                         else:
-...                                 new_lines.append(line)
-...                 else:
-...                         new_lines.append(line)
-... 
-... 
-...         # Write Changes back to the file
-...         with open(file_path, 'w') as file:
-...                 file.writelines(new_lines)
-... 
-...         # Message
-...         print(f"Network configuration updated to {mode} mode.")
-... 
-... 
-... # ----------------------------
-... # Function 4: Test Connectivity (Ping)
-... # ----------------------------
-... 
-... def test_ping(target):
-...     """
-...     Ping a target IP or hostname to test connectivity.
-...     Sends 2 ICMP echo requests using 'ping -c 2' on Linux.
-...     Returns True if ping is successful, False otherwise.
-...     """
-...     print(f"\n📡 Pinging {target} using ping...\n")
-... 
-...     try:
-...         # For Linux/Mac
-...         result = subprocess.run(['ping', '-c', '2', target], capture_output=True, text=True)
-...         
-...         # Uncomment this for Windows instead:
-...         # result = subprocess.run(['ping', '-n', '2', target], capture_output=True, text=True)
-... 
-...         # Show ping output
-...         print(result.stdout)
-... 
-...         if result.returncode == 0:
-...             print("Ping successful!")
-...             return True
-...         else:
-...             print("Ping failed: No response from target.")
-...             return False
-... 
-...     except TypeError:
-...         print("Invalid input: target must be a string.")
-...         return False
+                                        new_lines.append(line)
+                        else:
+                                new_lines.append(line)
+                else:
+                        new_lines.append(line)
+
+
+        # Write Changes back to the file
+        with open(file_path, 'w') as file:
+                file.writelines(new_lines)
+
+        # Message
+        print(f"Network configuration updated to {mode} mode.")
+
+
+
+# ----------------------------
+# Function 4: Test Connectivity (Ping)
+# ----------------------------
+def test_ping(target):
     """
     Pings a target IP address to test internet/network connectivity.
 
@@ -249,10 +237,139 @@ def change_network_mode(file_path, mode, ip=None):
          print("Invalid input: target must be a string.")
          return False
 
-... 
-... # ----------------------------
-... # Main Function with Argument Parser
-@@ -341,3 +348,4 @@
+    
+# ----------------------------
+# Main Function with Argument Parser
+# ----------------------------
+def main():
+    """
+    Main function to handle command line arguments and call appropriate functions.
+
+    Commands supported:
+        - validate <ip>
+        - backup <file_path>
+        - change <file_path> <mode> [--ip <ip_address>]
+        - ping [--target <ip>]
+    """
+    parser = argparse.ArgumentParser(description="Network Configuration Tool")
+
+    subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
+
+    # Subcommand: validate
+    parser_validate = subparsers.add_parser("validate", help="Validate an IP address")
+    parser_validate.add_argument("--ip", required=True, help="Requires an IP address to validate")
+    parser_validate.add_argument("-s","--subnet", required=True, help="Requires a subnet to validate")
+
+    # Subcommand: backup
+    parser_backup = subparsers.add_parser("backup", help="Backup a network config file")
+    parser_backup.add_argument("-f","--file", required=True, help="Path to the file to back up")
+
+    # Subcommand: restore 
+    parser_restore = subparsers.add_parser("restore", help="Restore configuration from a backup")
+
+    # Subcommand: change
+    parser_change = subparsers.add_parser("change", help="Change network mode (static/dhcp)")
+    parser_change.add_argument("-f","--file", nargs='?', default="/etc/NetworkManager/system-connections/Wired connection 1.nmconnection", help="Path to the config file")
+    parser_change.add_argument("-m","--mode", choices=["static", "dhcp"], required=True, help="Network mode to set")
+    parser_change.add_argument("--ip", help="Static IP address (required for static mode)")
+    parser_change.add_argument("-s","--subnet", help="Missing Subnet (required for static mode)")
+
+    # Subcommand: ping
+    parser_ping = subparsers.add_parser("ping", help="Ping a target to test connectivity")
+    parser_ping.add_argument("--target", default="8.8.8.8", help="Target IP to ping")
+
+    args = parser.parse_args()
+
+    # Save path for restoring
+    orig_path = "/etc/NetworkManager/system-connections/Wired connection 1.nmconnection"
+    backup_path = orig_path + '.bak'
+
+    if args.command == "validate":
+        validate_ip(args.ip, args.subnet)
+
+    elif args.command == "backup":
+        try:
+            backup_file(args.file)
+        except FileNotFoundError as e:
+            print(f"ERROR: {e}")
+
+    elif args.command == "restore":
+        try:
+            if os.path.exists(orig_path):
+                os.remove(orig_path)
+            shutil.copy2(backup_path, orig_path)
+            print("Restored configuration from backup file")
+            # Removes the runtime configuration so it loads the new one
+            if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
+                os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
+                flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+                res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+                if flush.returncode != 0 or res.returncode != 0:
+                    print("ERROR: Could not apply changes.")
+                else:
+                    print("New network configuration successfully updated.")
+
+        except FileNotFoundError:
+            print('ERROR: No backup file found')  
+
+    elif args.command == "change":
+        if args.mode == "static":
+            if not args.ip:
+                print("ERROR: Static requires an IP address. Use --ip followed by the IP address")
+                return
+            if not validate_ip(args.ip, args.subnet):
+                print("ERROR: Invalid or missing IP and subnet.")
+                return
+        change_network_mode(args.file, args.mode, ip=args.ip, subnet=args.subnet)
+        # Restart NetworkManager to apply changes
+        print("Restarting NetworkManager to apply new changes")
+        # Removes the runtime configuration so it loads the new one
+        if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
+            os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
+        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+        res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+        if flush.returncode != 0 or res.returncode != 0:
+             print("ERROR: Could not apply changes.")
+        else:
+             print("New network configuration successfully updated.")
+
+    elif args.command == "ping":
+        if not test_ping(args.target):
+            print("Ping failed: there may be an issue with the current network configuration.")
+            # Attempt to restore NetworkManager config from backup
+            
+            restore = input('\nWould you like to restore from backup? (y/n): ')
+            if restore == 'y':
+                if os.path.isfile(backup_path):
+                    try:
+                        if os.path.isfile(orig_path):
+                            os.remove(orig_path)
+                            print(f"Deleted current config at {orig_path}.")
+                        shutil.copy2(backup_path, orig_path)
+                        print(f"Restored backup configuration from {backup_path} to {orig_path}.")
+                        # Restart to apply restored config
+                        print("Restarting NetworkManager to apply new changes.")
+                        # Removes the runtime configuration so it loads the new one
+                        if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
+                            os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
+                        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+                        res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+                        if flush.returncode != 0 or res.returncode != 0:
+                            print("ERROR: Could not apply changes.")
+                        else:
+                            print("New network configuration successfully updated.")
+
+                    except PermissionError:
+                        print("ERROR: Could not restore backup. Try running with elevated privileges.")
+                    except OSError as e:
+                        print(f"ERROR: Failed to restore backup: {e}")
+            else:
+                exit()
+    else:
+        parser.print_help()
+
+# ----------------------------
+# Entry Point
 # ----------------------------
 if __name__ == "__main__":
     main()
