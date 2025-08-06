@@ -18,9 +18,6 @@ import subprocess
 # ----------------------------
 # Function 1: Validate IP Address
 # ----------------------------
-# ----------------------------
-# Function 1: Validate IP Address
-# ----------------------------
 def validate_ip(ip, subnet):
     """
     Checks if the given IP address is valid (IPv4).
