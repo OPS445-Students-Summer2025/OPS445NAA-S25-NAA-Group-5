@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # assignment2.py
 
 """
