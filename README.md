@@ -1,6 +1,6 @@
 # 📡 Assignment 2 - Network Configuration Tool
 
-This command-line tool helps manage and troubleshoot network settings using **Netnetwork_configuration_tool.py**.
+This command-line tool helps manage and troubleshoot network settings using **asssignment2.py**.
 
 ---
 
@@ -24,7 +24,7 @@ This command-line tool helps manage and troubleshoot network settings using **Ne
 
 ## 🔧 Setup
 
-This will download your **Network_configuration_tool.py** locally, allowing you to use them on your command prompt.
+This will download your **assignment2.py** locally, allowing you to use them on your command prompt.
 
 ### 1. Clone your repository into your console using SSH:
 
@@ -37,7 +37,7 @@ git clone <ssh link> ~/NetworkConftools/
 ## 🖥️ Usage
 
 ```bash
-python network_configuration_tool.py <command> [options]
+python assignment2.py <command> [options]
 ```
 
 ---
@@ -58,31 +58,31 @@ python network_configuration_tool.py <command> [options]
 ### ✅ Validate IP Address
 
 ```bash
-python network_configuration_tool.py validate <YOUR-IP-ADDRESS>
+python assignment2.py validate <YOUR-IP-ADDRESS>
 ```
 
 ### 🛟 Backup Config File
 
 ```bash
-python network_configuration_tool.py backup /etc/NetworkManager/NetworkManager.conf
+python assignment2.py backup /etc/NetworkManager/NetworkManager.conf
 ```
 
 ### 🔁 Change Network Mode
 
 **Switch to DHCP:**
 ```bash
-python network_configuration_tool.py change /etc/NetworkManager/NetworkManager.conf dhcp
+python assignment2.py change /etc/NetworkManager/NetworkManager.conf dhcp
 ```
 
 **Switch to Static IP:**
 ```bash
-python network_configuration_tool.py change /etc/NetworkManager/NetworkManager.conf static --ip <YOUR-IP-ADDRESS>
+python assignment2.py change /etc/NetworkManager/NetworkManager.conf static --ip <YOUR-IP-ADDRESS>
 ```
 
 ### 📶 Test Network Connectivity
 
 ```bash
-python network_configuration_tool.py ping --target <YOUR-IP-ADDRESS>
+python assignment2.py ping --target <YOUR-IP-ADDRESS>
 ```
 
 > If ping fails, the script attempts to restore the previous config from backup.
