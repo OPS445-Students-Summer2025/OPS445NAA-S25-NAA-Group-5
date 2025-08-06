@@ -50,7 +50,28 @@ def backup_file(file_path):
         - Copy it to a new file with '.bak' extension.
     """
     # TODO: Use shutil to copy the file safely
-    pass
+    # Proceed with backup
+    
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+
+    backup_dir = "/etc/NetworkManager/system-connections"
+    os.makedirs(backup_dir, exist_ok=True)
+
+    backup_path = os.path.join(backup_dir, os.path.basename(file_path) + ".bak")
+
+    try:
+        shutil.copy2(file_path, backup_path)
+    except PermissionError as exc:
+        # This could happen if you can't read the source file.
+        print(f"Backup failed due to permissions: {exc}")
+        return None
+    except OSError as exc:
+        print(f"Backup failed: {exc}")
+        return None
+
+    print(f"Backup created at: {backup_path}")
+    return backup_path
 
     
 
@@ -69,17 +90,93 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
 
     Behavior:
         - Backup the original file first.
-        - Modify lines related to BOOTPROTO and IPADDR.
+        - Modify lines related to IP method, address, and DNS.
         - Save the changes.
     """
 
-    # TODO: Read the file, modify lines, and write back changes
-    pass
+    # Check if the file exists
+    if not os.path.exists(file_path):
+        print(f"Error: File {file_path} does not exist.")
+        if os.path.exists("/run/NetworkManager/system-connections/Wired connection 1.nmconnection"):
+            shutil.copy2("/run/NetworkManager/system-connections/Wired connection 1.nmconnection", "/etc/NetworkManager/system-connections/Wired connection 1.nmconnection")
+        return
+
+    # Validate static mode input
+    if mode == "static" and not ip:
+        print("Error: Static mode requires an IP address.")
+        return
+
+    # Get default gateway
+    gateway = subprocess.check_output("ip route show default | awk '/default/ {print $3}'", shell=True).decode().strip()
+
+    # Backup file
+    backup_file(file_path)
+
+    # Read the file
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    new_lines = []
+    in_ipv4 = False
+
+    # Process each line
+    for line in lines:
+        stripped = line.strip()
+
+        # Check for start of [ipv4] section
+        if stripped == "[ipv4]":
+            in_ipv4 = True
+            new_lines.append(line)
+            if mode == "static" and ip and not any("address1=" in l for l in new_lines):
+                new_lines.append("method=manual\n")
+                new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
+                new_lines.append("dns=8.8.8.8;1.1.1.1\n")
+            continue
+
+        elif stripped.startswith("[") and stripped != "[ipv4]":
+            in_ipv4 = False
+
+        # Modify [ipv4] settings
+        if in_ipv4:
+            if stripped.startswith("method="):
+                if mode == "dhcp":
+                    new_lines.append("method=auto\n")
+                else:
+                    new_lines.append("method=manual\n")
+
+            elif stripped.startswith("address1="):
+                if mode == "static" and ip:
+                    new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
+                elif mode == "dhcp":
+                    continue
+                else:
+                    new_lines.append(line)
+
+            elif stripped.startswith("dns="):
+                if mode == "static":
+                    new_lines.append("dns=8.8.8.8;1.1.1.1\n")
+                elif mode == "dhcp":
+                    continue
+                else:
+                    new_lines.append(line)
+
+            else:
+                new_lines.append(line)
+
+        else:
+            new_lines.append(line)
+
+    # Write changes
+    with open(file_path, 'w') as file:
+        file.writelines(new_lines)
+
+    print(f"Network configuration updated to {mode} mode.")
 
 
 # ----------------------------
 # Function 4: Test Connectivity (Ping)
 # ----------------------------
+
 
 def test_ping(target):
     """
@@ -94,6 +191,7 @@ def test_ping(target):
 
     # TODO: Use subprocess to run 'ping -c 2 <target>' and print result
     pass
+
 
 # ----------------------------
 # Main Function with Argument Parser
