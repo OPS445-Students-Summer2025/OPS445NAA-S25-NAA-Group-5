@@ -53,7 +53,8 @@ def backup_file(file_path):
 # ----------------------------
 # Function 3: Change Network Mode (static/dhcp)
 # ----------------------------
-def change_network_mode(file_path, mode, ip=None):
+
+def change_network_mode(file_path, mode, ip=None, subnet=None):
     """
     Changes the network mode to either static or dhcp.
 
@@ -64,16 +65,93 @@ def change_network_mode(file_path, mode, ip=None):
 
     Behavior:
         - Backup the original file first.
-        - Modify lines related to BOOTPROTO and IPADDR.
+        - Modify lines related to IP method, address, and DNS.
         - Save the changes.
     """
-    # TODO: Read the file, modify lines, and write back changes
-    pass
+
+    # Check if the file exists
+    if not os.path.exists(file_path):
+        print(f"Error: File {file_path} does not exist.")
+        if os.path.exists("/run/NetworkManager/system-connections/Wired connection 1.nmconnection"):
+            shutil.copy2("/run/NetworkManager/system-connections/Wired connection 1.nmconnection", "/etc/NetworkManager/system-connections/Wired connection 1.nmconnection")
+        return
+
+    # Validate static mode input
+    if mode == "static" and not ip:
+        print("Error: Static mode requires an IP address.")
+        return
+
+    # Get default gateway
+    gateway = subprocess.check_output("ip route show default | awk '/default/ {print $3}'", shell=True).decode().strip()
+
+    # Backup file
+    backup_file(file_path)
+
+    # Read the file
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    new_lines = []
+    in_ipv4 = False
+
+    # Process each line
+    for line in lines:
+        stripped = line.strip()
+
+        # Check for start of [ipv4] section
+        if stripped == "[ipv4]":
+            in_ipv4 = True
+            new_lines.append(line)
+            if mode == "static" and ip and not any("address1=" in l for l in new_lines):
+                new_lines.append("method=manual\n")
+                new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
+                new_lines.append("dns=8.8.8.8;1.1.1.1\n")
+            continue
+
+        elif stripped.startswith("[") and stripped != "[ipv4]":
+            in_ipv4 = False
+
+        # Modify [ipv4] settings
+        if in_ipv4:
+            if stripped.startswith("method="):
+                if mode == "dhcp":
+                    new_lines.append("method=auto\n")
+                else:
+                    new_lines.append("method=manual\n")
+
+            elif stripped.startswith("address1="):
+                if mode == "static" and ip:
+                    new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
+                elif mode == "dhcp":
+                    continue
+                else:
+                    new_lines.append(line)
+
+            elif stripped.startswith("dns="):
+                if mode == "static":
+                    new_lines.append("dns=8.8.8.8;1.1.1.1\n")
+                elif mode == "dhcp":
+                    continue
+                else:
+                    new_lines.append(line)
+
+            else:
+                new_lines.append(line)
+
+        else:
+            new_lines.append(line)
+
+    # Write changes
+    with open(file_path, 'w') as file:
+        file.writelines(new_lines)
+
+    print(f"Network configuration updated to {mode} mode.")
 
 
 # ----------------------------
 # Function 4: Test Connectivity (Ping)
 # ----------------------------
+
 
 def test_ping(target):
     """
@@ -109,6 +187,7 @@ def test_ping(target):
     except TypeError:
          print("Invalid input: target must be a string.")
          return False
+
 
 # ----------------------------
 # Main Function with Argument Parser
