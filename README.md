@@ -16,7 +16,7 @@ This command-line tool helps manage and troubleshoot network settings using **as
 
 ## 🧰 Requirements
 
-- Python **3.6+**
+- Python3 **3.6+**
 - Linux system (for NetworkManager operations)
 - Run with **sudo** for system-level changes
 
@@ -37,19 +37,18 @@ git clone <ssh link> ~/NetworkConftools/
 ## 🖥️ Usage
 
 ```bash
-python assignment2.py <command> [options]
+python3 assignment2.py <command> [options]
 ```
 
 ---
 
-## 📋 Available Commands and Parameters
+| **Command** | **Parameters**                                                                                                 | **Required** | **Description**                                                                                       |
+| ----------- | -------------------------------------------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------- |
+| `validate`  | `--ip <ip>`<br>`-s, --subnet <subnet>`                                                                         | ✅            | Validates if the given IP is a proper IPv4.                                                           |
+| `backup`    | `-f, --file <file_path>`                                                                                       | ✅            | Creates a backup of the given config file.                                                            |
+| `change`    | `-f, --file <file_path>`<br>`-m, --mode <mode: static/dhcp>`<br>`--ip`, `--subnet` (required if mode = static) | ✅            | Changes network settings based on mode. If mode is `static`, `--ip` and `--subnet` are also required. |
+| `ping`      | `--target <ip>`                                                                                                | ❌            | Pings the IP address provided.                                                                        |
 
-| Command    | Parameters                                      | Required | Description                                 |
-|------------|-------------------------------------------------|----------|---------------------------------------------|
-| `validate` | `<ip>`                                          | ✅       | Validates if the given IP is a proper IPv4  |
-| `backup`   | `<file_path>`                                   | ✅       | Creates a backup of the given config file   |
-| `change`   | `<file_path>` `<mode: static|dhcp>` `--ip <ip>` | ✅       | Changes network mode (static or dhcp)       |
-| `ping`     | `--target <ip>`                                 | ❌       | Pings the IP |
 
 ---
 
@@ -58,31 +57,31 @@ python assignment2.py <command> [options]
 ### ✅ Validate IP Address
 
 ```bash
-python assignment2.py validate <YOUR-IP-ADDRESS>
+python3 assignment2.py validate --ip <YOUR-IP-ADDRESS> -s <SUBNET>
 ```
 
 ### 🛟 Backup Config File
 
 ```bash
-python assignment2.py backup /etc/NetworkManager/NetworkManager.conf
+python3 assignment2.py backup -f "/etc/NetworkManager/system-connections/'Wired connection 1.nmconnection'"
 ```
 
 ### 🔁 Change Network Mode
 
 **Switch to DHCP:**
 ```bash
-python assignment2.py change /etc/NetworkManager/NetworkManager.conf dhcp
+python3 assignment2.py change /etc/NetworkManager/NetworkManager.conf dhcp
 ```
 
 **Switch to Static IP:**
 ```bash
-python assignment2.py change /etc/NetworkManager/NetworkManager.conf static --ip <YOUR-IP-ADDRESS>
+python3 assignment2.py change /etc/NetworkManager/NetworkManager.conf static --ip <YOUR-IP-ADDRESS>
 ```
 
 ### 📶 Test Network Connectivity
 
 ```bash
-python assignment2.py ping --target <YOUR-IP-ADDRESS>
+python3 assignment2.py ping --target <YOUR-IP-ADDRESS>
 ```
 
 > If ping fails, the script attempts to restore the previous config from backup.
