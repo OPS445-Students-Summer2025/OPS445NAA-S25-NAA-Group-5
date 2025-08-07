@@ -280,8 +280,8 @@ def main():
             # Removes the runtime configuration so it loads the new one
             if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
                 os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
-                flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
                 res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+                flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
                 if flush.returncode != 0 or res.returncode != 0:
                     print("ERROR: Could not apply changes.")
                 else:
@@ -304,8 +304,9 @@ def main():
         # Removes the runtime configuration so it loads the new one
         if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
             os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
-        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+            
         res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
         if flush.returncode != 0 or res.returncode != 0:
              print("ERROR: Could not apply changes.")
         else:
@@ -330,8 +331,9 @@ def main():
                         # Removes the runtime configuration so it loads the new one
                         if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
                             os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
-                        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+                            
                         res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+                        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
                         if flush.returncode != 0 or res.returncode != 0:
                             print("ERROR: Could not apply changes.")
                         else:
