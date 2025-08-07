@@ -92,7 +92,7 @@ python assignment2.py ping --target <YOUR-IP-ADDRESS>
 ## ⚠️ Notes
 
 - Use **sudo** for commands that modify system files or restart services.
-- Backup files are stored in: `~/backups/`
+- Backup files are stored in: `/etc/NetworkManager/system-connections/`
 - The script restarts `NetworkManager` after changes.
 
 ---
