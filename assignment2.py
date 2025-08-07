@@ -102,7 +102,7 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
         if stripped == "[ipv4]":
             in_ipv4 = True
             new_lines.append(line)
-            if mode == "static" and ip and not any("address1=" in l for l in new_lines):
+            if mode == "static" and ip and not any("address1=" in l for l in lines):
                 new_lines.append("method=manual\n")
                 new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
                 new_lines.append("dns=8.8.8.8;1.1.1.1\n")
