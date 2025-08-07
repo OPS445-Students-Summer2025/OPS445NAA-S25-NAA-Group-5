@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # assignment2.py
 
 """
@@ -59,7 +58,6 @@ def validate_ip(ip, subnet):
     
     print(f"Great! {ip}/{subnet} is a valid IPv4 address with subnet.")
     return True
-
 
 # ----------------------------
 # Function 2: Backup Config File
