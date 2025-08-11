@@ -96,4 +96,7 @@ python3 assignment2.py ping --target <YOUR-IP-ADDRESS>
 
 ## References
 - Argparse: https://docs.python.org/3/library/argparse.html
+- Files & Error Handling: https://docs.python.org/3/tutorial/errors.html
+- OS module: https://docs.python.org/3/library/os.html
+- Shutil module: https://docs.python.org/3/library/shutil.html
 ---
