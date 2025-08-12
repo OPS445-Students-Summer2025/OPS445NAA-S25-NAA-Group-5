@@ -29,16 +29,21 @@ def validate_ip(ip, subnet):
     Returns:
         bool: True if valid, False otherwise.
     """
+    
+    # Split into 4 parts with dot as a separator
     parts = ip.split(".") 
 
     if len(parts) != 4:
         print("Oops! IP address must have 4 numbers separated by dots.")   
         return False
-
+    
+    # Check every part of the list if integer
     for part in parts:
         if not part.isdigit():
             print(f"Oops! '{part}' is not a number.")
             return False
+
+    # Every part of the list should not start with zero, unless it's only zero
         if part.startswith("0") and len(part) > 1:
             print(f"Oops! '{part}' should not have leading zeros.")
             return False
@@ -56,7 +61,8 @@ def validate_ip(ip, subnet):
     except (ValueError, TypeError):
         print("Oops! Subnet mask must be an integer.")
         return False
-    
+ 
+    # If all validation checks are successful, print this line
     print(f"Great! {ip}/{subnet} is a valid IPv4 address with subnet.")
     return True
 
@@ -153,7 +159,7 @@ def change_network_mode(file_path, mode, ip=None, subnet=None):
         if stripped == "[ipv4]":
             in_ipv4 = True
             new_lines.append(line)
-            if mode == "static" and ip and not any("address1=" in l for l in new_lines):
+            if mode == "static" and ip and not any("address1=" in l for l in lines):
                 new_lines.append("method=manual\n")
                 new_lines.append(f"address1={ip}/{subnet},{gateway}\n")
                 new_lines.append("dns=8.8.8.8;1.1.1.1\n")
@@ -306,12 +312,12 @@ def main():
             # Removes the runtime configuration so it loads the new one
             if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
                 os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
-                flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
-                res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
-                if flush.returncode != 0 or res.returncode != 0:
-                    print("ERROR: Could not apply changes.")
-                else:
-                    print("New network configuration successfully updated.")
+            res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+            flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+            if flush.returncode != 0 or res.returncode != 0:
+                print("ERROR: Could not apply changes.")
+            else:
+                print("New network configuration successfully updated.")
 
         except FileNotFoundError:
             print('ERROR: No backup file found')  
@@ -330,8 +336,9 @@ def main():
         # Removes the runtime configuration so it loads the new one
         if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
             os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
-        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+            
         res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
         if flush.returncode != 0 or res.returncode != 0:
              print("ERROR: Could not apply changes.")
         else:
@@ -356,8 +363,9 @@ def main():
                         # Removes the runtime configuration so it loads the new one
                         if os.path.exists('/run/NetworkManager/system-connections/Wired connection 1.nmconnection'):
                             os.remove('/run/NetworkManager/system-connections/Wired connection 1.nmconnection')
-                        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
+                            
                         res = subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
+                        flush = subprocess.run(["sudo", "ip", "addr", "flush", "dev", "ens33"])
                         if flush.returncode != 0 or res.returncode != 0:
                             print("ERROR: Could not apply changes.")
                         else:
