@@ -94,6 +94,8 @@ python3 assignment2.py ping --target <YOUR-IP-ADDRESS>
 - Backup files are stored in: `/etc/NetworkManager/system-connections/`
 - The script restarts `NetworkManager` after changes.
 
+---
+
 ## References
 - Argparse: https://docs.python.org/3/library/argparse.html
----
+- Validate an IP : https://www.geeksforgeeks.org/python/python-program-to-validate-an-ip-address

@@ -29,16 +29,21 @@ def validate_ip(ip, subnet):
     Returns:
         bool: True if valid, False otherwise.
     """
+    
+    # Split into 4 parts with dot as a separator
     parts = ip.split(".") 
 
     if len(parts) != 4:
         print("Oops! IP address must have 4 numbers separated by dots.")   
         return False
-
+    
+    # Check every part of the list if integer
     for part in parts:
         if not part.isdigit():
             print(f"Oops! '{part}' is not a number.")
             return False
+
+    # Every part of the list should not start with zero, unless it's only zero
         if part.startswith("0") and len(part) > 1:
             print(f"Oops! '{part}' should not have leading zeros.")
             return False
@@ -56,7 +61,8 @@ def validate_ip(ip, subnet):
     except (ValueError, TypeError):
         print("Oops! Subnet mask must be an integer.")
         return False
-    
+ 
+    # If all validation checks are successful, print this line
     print(f"Great! {ip}/{subnet} is a valid IPv4 address with subnet.")
     return True
 
